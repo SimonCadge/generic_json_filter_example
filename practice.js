@@ -1,4 +1,5 @@
 import jmespath from 'jmespath';
+import util from 'util';
 
 const cart = {
     products: [
@@ -36,6 +37,16 @@ const rules = [
         orRules: [{path: "products[*].brand", values: ["Nike"]}],
         andRules: [{path: "name.firstName", values: ["Bob"]}],
     },
+    {
+        orRules: [
+            {path: "products[*].color", values: ["Red", "Green"]},
+            {path: "products[*].category", values: ["Swimming Trunks"]}
+        ],
+        andRules: [
+            {path: "address.country", values: ["America"]},
+            {path: "address.state", values: ["WA"]}
+        ]
+    },
     { //General rule
         orRules: [{path: "products[*].price", values: [18.5]}],
     },
@@ -62,33 +73,34 @@ function applyRule(cart, rulePath, ruleValues) {
     return false;
 }
 
-function checkCart(cart) {
-    for (let rule of rules) {
-        let orRulesApplies = false;
-        let andRulesApplies = true;
-        if (rule.orRules !== undefined) {
-            for (let orRule of rule.orRules) {
-                const ruleApplies = applyRule(cart, orRule.path, orRule.values);
-                if (ruleApplies) {
-                    orRulesApplies = true;
-                    break;
-                }
+function checkCart(cart, ruleset) {
+    let orRulesApplies = false;
+    let andRulesApplies = true;
+    if (ruleset.orRules !== undefined) {
+        for (let orRule of ruleset.orRules) {
+            const ruleApplies = applyRule(cart, orRule.path, orRule.values);
+            if (ruleApplies) {
+                orRulesApplies = true;
+                break;
             }
         }
-        if (rule.andRules !== undefined) {
-            for (let andRule of rule.andRules) {
-                const ruleApplies = applyRule(cart, andRule.path, andRule.values);
-                if (!ruleApplies) {
-                    andRulesApplies = false;
-                    break;
-                }
+    }
+    if (ruleset.andRules !== undefined) {
+        for (let andRule of ruleset.andRules) {
+            const ruleApplies = applyRule(cart, andRule.path, andRule.values);
+            if (!ruleApplies) {
+                andRulesApplies = false;
+                break;
             }
         }
-        if (orRulesApplies && andRulesApplies) {
-            return true;
-        }
+    }
+    if (orRulesApplies && andRulesApplies) {
+        return true;
     }
     return false;
 }
 
-console.log(checkCart(cart));
+for (let ruleset of rules) {
+    console.log("Ruleset to Check: ", util.inspect(ruleset, {depth: 3}));
+    console.log("Is Filtered: ", checkCart(cart, ruleset), "\n");
+}
