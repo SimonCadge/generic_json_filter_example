@@ -100,7 +100,8 @@ function checkCart(cart, ruleset) {
     return false;
 }
 
+console.log("Dataset: ", util.inspect(cart, {depth: 3, colors: true}))
 for (let ruleset of rules) {
-    console.log("Ruleset to Check: ", util.inspect(ruleset, {depth: 3}));
+    console.log("Ruleset to Check: ", util.inspect(ruleset, {depth: 3, colors: true}));
     console.log("Is Filtered: ", checkCart(cart, ruleset), "\n");
 }
